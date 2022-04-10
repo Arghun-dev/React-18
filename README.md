@@ -56,3 +56,31 @@ export default funciton App() {
 what react does, it will call `setState` inside of any other function, it will actually batch those `setState` calls those together, and the call them at once, so it doesn't cause multiple renders, and all of your data is applied in one render, this is good for performance.
 
 And if you don't want to batch, you can use `flushSync` api.
+
+
+## Suspense
+
+**Streaming HTML and Selective Hydration**
+
+There are 2 major SSR features in React 18 unlocked by Suspense:
+
+Streaming HTML basically means that user can make the page interactable beforea all of the data is loaded in, so for example with server side rendering nowadays, the client has to fetch all of the HTML, after fetching the HTML, the client then loads all of the JavaScript code from the server, and then hydrates the entire app, what `hydration` basically does is it maps all of the virtual dom elements with all of the real dom elements, which are present in the html, however react makes it faster now via `suspense`. 
+
+Now the API for suspense works like this:
+
+```js
+<Layout>
+  <Navbar />
+  <Sidebar />
+  <RightPane>
+    <Post />
+    <Suspense fallback={<Spinner />}>
+      <Comments />
+    </Suspense>
+  </RightPane>
+</Layout>
+```
+  
+You define a part of your components as children for suspense component and you define a fallback.
+
+Now, for Comments, when the page is initially loaded in, the Suspense component will display the `Spinner`, since the data has yet to be loaded in, now after the HTML is loaded in, react will stream the new html and replace the spinner with the comments component, so this solves part of the problem, where you don't have to fetch all of the data before you fetch anything, now for the second part where all of the page has to be hydrated at the same time, Suspense now allows selective hydration, and it can remove certain parts of the page from the hydration and allow them hydrate separately, so in the case of this comments component, since this is inside of Suspense, all of the rest of the page can be hydrated by react, and when the new component gets loaded in, react will hydrate it separately, this is known as selective hydration, react also handles the order of hydrating the components in the page, so the user does not have to worry about things hydrating out of order and destroying the user experience. so this gives a benefit of having a more interactable page and having it load faster rather than having to wait for everything to load in.
